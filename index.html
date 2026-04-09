@@ -1,727 +1,343 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>リベ大 YouTube検索</title>
-  <style>
-    :root {
-      --primary: #ff6b35;
-      --primary-dark: #e55a28;
-      --primary-light: rgba(255,107,53,0.1);
-      --secondary: #1a1a2e;
-      --bg: #f0f2f5;
-      --card-bg: #ffffff;
-      --border: #e1e4e8;
-      --text-primary: #1a1a2e;
-      --text-secondary: #555;
-      --text-muted: #999;
-      --shadow: 0 2px 8px rgba(0,0,0,0.08);
-      --shadow-hover: 0 8px 24px rgba(0,0,0,0.14);
-      --radius: 12px;
-      --radius-sm: 8px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>両学長 Search</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0d0d; --surface:#161616; --card:#1e1e1e; --card2:#242424;
+  --gold:#f0b429; --gold-dim:#c49020; --red:#e84040; --green:#3ecf6e;
+  --blue:#4a9eff; --purple:#a78bfa;
+  --text:#f0f0f0; --muted:#888; --border:#2a2a2a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+/* HEADER */
+header{
+  background:var(--surface);border-bottom:2px solid var(--gold);
+  padding:12px 20px;position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.logo-main{font-family:'Oswald',sans-serif;font-size:20px;color:var(--gold);letter-spacing:3px;white-space:nowrap;}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:1px;}
+.search-area{flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px;}
+.search-row{display:flex;gap:8px;align-items:center;}
+.search-wrap{flex:1;position:relative;}
+.search-wrap input{
+  width:100%;background:var(--card);border:1px solid var(--border);
+  border-radius:6px;padding:9px 36px 9px 12px;color:var(--text);
+  font-size:13px;font-family:'Noto Sans JP',sans-serif;outline:none;transition:border-color .2s;
+}
+.search-wrap input:focus{border-color:var(--gold);}
+.search-wrap .si{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;}
+.search-opts{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--muted);}
+.mode-btn{
+  background:var(--card);border:1px solid var(--border);border-radius:4px;
+  padding:3px 10px;color:var(--muted);cursor:pointer;font-size:11px;
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;
+}
+.mode-btn.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:700;}
+.year-select,.sort-select{
+  background:var(--card);border:1px solid var(--border);border-radius:6px;
+  padding:9px 10px;color:var(--text);font-size:12px;
+  font-family:'Noto Sans JP',sans-serif;outline:none;cursor:pointer;
+}
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
-        'Yu Gothic', 'Meiryo', sans-serif;
-      background: var(--bg);
-      color: var(--text-primary);
-      min-height: 100vh;
-    }
+/* PROGRESS */
+.progress-section{
+  background:#0a0a0a;border-bottom:1px solid var(--border);
+  padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.progress-bar-wrap{flex:1;min-width:160px;}
+.progress-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;}
+.progress-label strong{color:var(--green);}
+.progress-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),#22d3ee);border-radius:3px;transition:width .4s;}
+.progress-stats{display:flex;gap:16px;font-size:11px;color:var(--muted);flex-wrap:wrap;}
+.pstat strong{font-size:14px;}
+.pstat.g strong{color:var(--green);}
+.pstat.r strong{color:var(--red);}
+.pstat.b strong{color:var(--blue);}
+.pstat.p strong{color:var(--purple);}
 
-    /* ── Header ── */
-    .header {
-      background: var(--secondary);
-      color: white;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-    }
+/* TABS */
+.tabs-wrap{padding:12px 20px 0;overflow-x:auto;scrollbar-width:none;}
+.tabs-wrap::-webkit-scrollbar{display:none;}
+.tabs{display:flex;gap:7px;min-width:max-content;}
+.tab{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:5px 14px;font-size:11px;color:var(--muted);cursor:pointer;
+  transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;
+}
+.tab:hover{border-color:#444;color:var(--text);}
+.tab.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:700;}
+.tab.t-fav.active{background:var(--red);border-color:var(--red);color:#fff;}
+.tab.t-check.active{background:var(--green);border-color:var(--green);color:#000;}
+.tab.t-later.active{background:var(--blue);border-color:var(--blue);color:#fff;}
+.tab-badge{background:rgba(255,255,255,.18);border-radius:8px;padding:1px 6px;font-size:10px;font-weight:700;}
+.tab.active .tab-badge{background:rgba(0,0,0,.2);}
 
-    .header-logo {
-      font-size: 18px;
-      font-weight: 800;
-      white-space: nowrap;
-      letter-spacing: -0.3px;
-    }
-    .header-logo .accent { color: var(--primary); }
+/* GRID */
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(276px,1fr));
+  gap:14px;padding:16px 20px 40px;
+}
 
-    .search-wrapper {
-      flex: 1;
-      display: flex;
-      gap: 8px;
-      max-width: 640px;
-    }
+/* CARD */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s;
+  animation:fadeIn .35s ease both;position:relative;
+}
+.card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.5);}
+.card.in-fav{border-color:rgba(232,64,64,.5);}
+.card.in-check{border-color:rgba(62,207,110,.5);}
+.card.in-later1{border-color:rgba(74,158,255,.35);}
+.card.in-later2{border-color:rgba(74,158,255,.6);}
+.card.in-later3{border-color:rgba(74,158,255,.9);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
-    .search-input {
-      flex: 1;
-      padding: 9px 16px;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      background: rgba(255,255,255,0.12);
-      color: white;
-      outline: none;
-      transition: background 0.2s;
-    }
-    .search-input::placeholder { color: rgba(255,255,255,0.45); }
-    .search-input:focus { background: rgba(255,255,255,0.22); }
+/* THUMB */
+.thumb-wrap{position:relative;aspect-ratio:16/9;overflow:hidden;background:#111;cursor:pointer;}
+.thumb-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .3s;}
+.card:hover .thumb-wrap img{transform:scale(1.03);}
+.duration{position:absolute;bottom:6px;right:8px;background:rgba(0,0,0,.88);color:#fff;font-size:10px;padding:2px 5px;border-radius:3px;font-weight:700;}
+.play-overlay{position:absolute;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.thumb-wrap:hover .play-overlay{opacity:1;}
+.play-btn{width:48px;height:48px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:#000;}
 
-    .mode-toggle {
-      display: flex;
-      background: rgba(255,255,255,0.1);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .mode-btn {
-      padding: 9px 13px;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.5);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      transition: all 0.2s;
-      letter-spacing: 0.5px;
-    }
-    .mode-btn.active {
-      background: var(--primary);
-      color: white;
-    }
+/* バッジ */
+.badge-row{position:absolute;top:7px;left:7px;display:flex;gap:4px;flex-wrap:wrap;max-width:90%;}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;line-height:1.4;}
+.badge-fav{background:var(--red);color:#fff;}
+.badge-check{background:var(--green);color:#000;}
+.badge-later{color:#fff;}
+.badge-later.l1{background:#1a4a8a;}
+.badge-later.l2{background:#1a5faa;}
+.badge-later.l3{background:var(--blue);}
 
-    /* ── Controls ── */
-    .controls {
-      background: white;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 53px;
-      z-index: 100;
-    }
+/* CARD BODY */
+.card-body{padding:10px 13px 8px;}
+.playlist-tag{display:inline-block;background:rgba(240,180,41,.1);color:var(--gold);font-size:10px;padding:2px 7px;border-radius:3px;margin-bottom:6px;font-weight:700;}
+.card-title{font-size:12.5px;font-weight:700;line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text);cursor:pointer;}
+.card-title:hover{color:var(--gold);}
+.card-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;}
+.views::before{content:'▶ ';font-size:9px;color:var(--red);}
 
-    .tabs-row {
-      display: flex;
-      gap: 0;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 0 24px;
-    }
-    .tabs-row::-webkit-scrollbar { display: none; }
+/* MEMO */
+.memo-area{padding:0 13px 8px;}
+.memo-input{
+  width:100%;background:var(--card2);border:1px solid var(--border);
+  border-radius:5px;padding:6px 8px;color:var(--text);font-size:11px;
+  font-family:'Noto Sans JP',sans-serif;outline:none;resize:none;transition:border-color .2s;line-height:1.4;
+}
+.memo-input:focus{border-color:var(--purple);}
+.memo-input::placeholder{color:#555;}
+.tags-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.tag{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3);border-radius:12px;padding:2px 8px;font-size:10px;cursor:pointer;}
+.tag:hover{background:rgba(167,139,250,.3);}
+.tag-add{background:transparent;border:1px dashed #444;color:#555;border-radius:12px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;}
+.tag-add:hover{border-color:var(--purple);color:var(--purple);}
 
-    .tab {
-      padding: 14px 16px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
-    }
-    .tab:hover { color: var(--primary); }
-    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+/* ACTIONS */
+.card-actions{display:flex;gap:6px;padding:0 13px 12px;flex-wrap:wrap;}
+.action-btn{
+  flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;
+  padding:6px 4px;border-radius:5px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:10px;
+  font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.action-btn:hover{border-color:#444;color:var(--text);}
+.btn-fav.on{background:rgba(232,64,64,.12);border-color:var(--red);color:var(--red);}
+.btn-check.on{background:rgba(62,207,110,.12);border-color:var(--green);color:var(--green);}
+.btn-later{position:relative;}
+.btn-later.on1{background:rgba(74,158,255,.1);border-color:#2a6eaa;color:#4a9eff;}
+.btn-later.on2{background:rgba(74,158,255,.18);border-color:#2a7fcc;color:#6ab4ff;}
+.btn-later.on3{background:rgba(74,158,255,.28);border-color:var(--blue);color:#8dd0ff;}
 
-    .filters-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 24px 12px;
-      flex-wrap: wrap;
-    }
+/* LATER POPUP */
+.later-popup{
+  position:absolute;bottom:calc(100% + 4px);left:0;right:0;
+  background:#1a1a2e;border:1px solid #2a4a7a;border-radius:6px;
+  padding:6px;z-index:100;display:none;
+}
+.later-popup.show{display:block;}
+.later-opt{padding:5px 8px;border-radius:4px;font-size:11px;cursor:pointer;color:var(--text);transition:background .15s;display:flex;align-items:center;gap:6px;}
+.later-opt:hover{background:rgba(74,158,255,.15);}
+.later-opt.active-opt{color:var(--blue);font-weight:700;}
+.btn-return{background:rgba(255,255,255,.05);border-color:#444;color:#aaa;}
+.btn-return:hover{background:rgba(255,255,255,.1);border-color:#666;color:#fff;}
 
-    .filter-select {
-      padding: 7px 10px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      background: white;
-      color: var(--text-primary);
-      cursor: pointer;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .filter-select:focus { border-color: var(--primary); }
+mark{background:rgba(240,180,41,.25);color:var(--gold);border-radius:2px;padding:0 1px;}
 
-    .result-count {
-      margin-left: auto;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
+.empty{text-align:center;padding:60px 24px;color:var(--muted);grid-column:1/-1;}
+.empty .em{font-size:44px;margin-bottom:12px;}
 
-    /* ── Progress ── */
-    .progress-bar-container {
-      background: white;
-      padding: 9px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+/* NO DATA */
+.no-data{
+  margin:24px 20px;padding:18px 20px;
+  background:#1a1200;border:1px solid #4a3200;border-radius:8px;
+  font-size:13px;line-height:1.7;color:#c8a000;
+}
+.no-data code{background:#2a2000;padding:2px 7px;border-radius:4px;font-size:12px;font-family:monospace;}
 
-    .progress-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
+/* LOADING */
+.loading{
+  text-align:center;padding:80px 24px;color:var(--muted);grid-column:1/-1;
+}
+.spinner{
+  width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-    .progress-track {
-      flex: 1;
-      height: 7px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      max-width: 280px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), #ffb347);
-      border-radius: 4px;
-      transition: width 0.4s ease;
-    }
-
-    .progress-pct {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--primary);
-      min-width: 38px;
-    }
-
-    /* ── Main ── */
-    .main {
-      padding: 24px;
-      max-width: 1440px;
-      margin: 0 auto;
-    }
-
-    /* ── Grid ── */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    /* ── Card ── */
-    .video-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-    }
-    .video-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-hover);
-    }
-
-    .thumb-wrap {
-      position: relative;
-      padding-top: 56.25%;
-      overflow: hidden;
-      background: #111;
-      cursor: pointer;
-    }
-    .thumb-wrap:hover .thumb-overlay { opacity: 1; }
-
-    .thumb-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s;
-    }
-    .video-card:hover .thumb-img { transform: scale(1.04); }
-
-    .thumb-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .play-icon {
-      width: 52px;
-      height: 52px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      padding-left: 4px;
-    }
-
-    .duration-badge {
-      position: absolute;
-      bottom: 6px;
-      right: 6px;
-      background: rgba(0,0,0,0.82);
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 6px;
-      border-radius: 4px;
-      letter-spacing: 0.3px;
-    }
-
-    .watch-later-badge {
-      position: absolute;
-      top: 7px;
-      left: 7px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 5px;
-    }
-    .watch-later-badge.low  { background: #e3f2fd; color: #1565c0; }
-    .watch-later-badge.medium { background: #fff3e0; color: #e65100; }
-    .watch-later-badge.high { background: #fce4ec; color: #c62828; }
-
-    .card-body {
-      padding: 12px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    .video-title {
-      font-size: 13.5px;
-      font-weight: 600;
-      line-height: 1.45;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .video-meta {
-      display: flex;
-      gap: 10px;
-      font-size: 12px;
-      color: var(--text-muted);
-      flex-wrap: wrap;
-    }
-    .meta-icon { margin-right: 2px; }
-
-    .playlist-chip {
-      display: inline-block;
-      font-size: 11px;
-      color: var(--primary);
-      background: var(--primary-light);
-      padding: 2px 8px;
-      border-radius: 4px;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .tag-chip {
-      font-size: 11px;
-      background: #f0f2f5;
-      color: var(--text-secondary);
-      padding: 2px 8px;
-      border-radius: 12px;
-    }
-
-    .note-preview {
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: #fafafa;
-      border-left: 3px solid var(--primary);
-      padding: 5px 8px;
-      border-radius: 0 6px 6px 0;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 5px;
-      margin-top: auto;
-      padding-top: 4px;
-    }
-
-    .action-btn {
-      flex: 1;
-      padding: 6px 6px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: white;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.18s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      white-space: nowrap;
-    }
-    .action-btn:hover { background: #f5f5f5; }
-    .action-btn.fav-on  { background: #fce4ec; border-color: #e91e63; color: #c2185b; }
-    .action-btn.watch-on { background: #e8f5e9; border-color: #4caf50; color: #2e7d32; }
-
-    .wl-select {
-      flex: 1.2;
-      padding: 6px 6px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 12px;
-      background: white;
-      cursor: pointer;
-      outline: none;
-      transition: border-color 0.18s;
-    }
-    .wl-select:focus { border-color: var(--primary); }
-    .wl-select.wl-set { border-color: #2196f3; color: #1565c0; background: #e3f2fd; }
-
-    /* ── Loading / Empty ── */
-    .loading, .empty-state {
-      text-align: center;
-      padding: 80px 24px;
-      color: var(--text-muted);
-    }
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--border);
-      border-top-color: var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 20px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .empty-icon { font-size: 52px; margin-bottom: 16px; }
-    .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-    .empty-sub { font-size: 13px; }
-
-    /* ── Modal ── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      backdrop-filter: blur(3px);
-    }
-    .modal {
-      background: white;
-      border-radius: var(--radius);
-      width: 100%;
-      max-width: 540px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 24px 72px rgba(0,0,0,0.3);
-      animation: slideUp 0.2s ease;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .modal-header {
-      padding: 20px 20px 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-title {
-      flex: 1;
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1.45;
-    }
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 22px;
-      cursor: pointer;
-      color: var(--text-muted);
-      line-height: 1;
-      padding: 0;
-      flex-shrink: 0;
-    }
-    .modal-close:hover { color: var(--text-primary); }
-    .modal-body { padding: 20px; }
-    .form-group { margin-bottom: 16px; }
-    .form-label {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 7px;
-    }
-    .form-textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-family: inherit;
-      resize: vertical;
-      min-height: 90px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-textarea:focus { border-color: var(--primary); }
-    .form-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .form-input:focus { border-color: var(--primary); }
-    .modal-footer {
-      padding: 14px 20px;
-      display: flex;
-      gap: 8px;
-      border-top: 1px solid var(--border);
-    }
-    .btn {
-      padding: 10px 20px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.18s;
-    }
-    .btn-primary { background: var(--primary); color: white; flex: 1; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .btn-secondary { background: #eee; color: var(--text-secondary); }
-    .btn-secondary:hover { background: #ddd; }
-
-    /* ── No data banner ── */
-    .no-data-banner {
-      background: #fff3cd;
-      border: 1px solid #ffecb5;
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      margin-bottom: 24px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .no-data-banner code {
-      background: #e9ecef;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 13px;
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 768px) {
-      .header { flex-wrap: wrap; padding: 12px 16px; gap: 10px; }
-      .header-logo { font-size: 16px; }
-      .search-wrapper { width: 100%; max-width: none; }
-      .main { padding: 16px; }
-      .video-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-      .controls { top: 86px; }
-      .tabs-row { padding: 0 16px; }
-      .filters-row { padding: 8px 16px 10px; }
-      .progress-bar-container { padding: 8px 16px; }
-    }
-    @media (max-width: 480px) {
-      .video-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+/* RESPONSIVE */
+@media(max-width:600px){
+  header{padding:10px 14px;}
+  .grid{padding:12px 14px 32px;gap:10px;grid-template-columns:1fr;}
+  .tabs-wrap{padding:10px 14px 0;}
+  .progress-section{padding:8px 14px;}
+}
+</style>
 </head>
 <body>
 
-<!-- Header -->
-<header class="header">
-  <div class="header-logo">📚 <span class="accent">リベ大</span> YouTube検索</div>
-  <div class="search-wrapper">
-    <input type="text" id="searchInput" class="search-input"
-      placeholder="キーワード検索（スペース区切りで複数可）">
-    <div class="mode-toggle">
-      <button class="mode-btn active" id="andBtn" onclick="setMode('AND')">AND</button>
-      <button class="mode-btn"        id="orBtn"  onclick="setMode('OR')">OR</button>
+<header>
+  <div>
+    <div class="logo-main">両学長 SEARCH</div>
+    <div class="logo-sub">リベ大動画を探す</div>
+  </div>
+  <div class="search-area">
+    <div class="search-row">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="キーワードで検索…（スペース区切りで複数入力）" oninput="render()">
+        <span class="si">🔍</span>
+      </div>
+      <select class="year-select" id="yearSelect" onchange="render()">
+        <option value="">すべての年</option>
+      </select>
+      <select class="sort-select" id="sortSelect" onchange="render()">
+        <option value="date">新しい順</option>
+        <option value="views">再生数順</option>
+        <option value="title">タイトル順</option>
+      </select>
+    </div>
+    <div class="search-opts">
+      検索モード：
+      <button class="mode-btn active" id="modeAND" onclick="setMode('AND')">AND</button>
+      <button class="mode-btn" id="modeOR"  onclick="setMode('OR')">OR</button>
+      <span id="modeHint" style="color:#555">すべてのキーワードを含む</span>
     </div>
   </div>
 </header>
 
-<!-- Controls -->
-<div class="controls">
-  <div class="tabs-row" id="tabsRow"></div>
-  <div class="filters-row">
-    <select id="yearFilter" class="filter-select" onchange="state.yearFilter=this.value; render()">
-      <option value="all">すべての年</option>
-    </select>
-    <select id="sortBy" class="filter-select" onchange="state.sortBy=this.value; render()">
-      <option value="newest">新しい順</option>
-      <option value="oldest">古い順</option>
-      <option value="views">再生数順</option>
-      <option value="title">タイトル順</option>
-    </select>
-    <div class="result-count" id="resultCount"></div>
+<div class="progress-section">
+  <div class="progress-bar-wrap">
+    <div class="progress-label"><span>視聴進捗</span><strong id="pctLabel">0%</strong></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="progress-stats">
+    <div class="pstat g"><strong id="cntCheck">0</strong> 視聴済</div>
+    <div class="pstat r"><strong id="cntFav">0</strong> お気に入り</div>
+    <div class="pstat b"><strong id="cntLater">0</strong> あとで見る</div>
+    <div class="pstat p"><strong id="cntTotal">0</strong> 総動画</div>
   </div>
 </div>
 
-<!-- Progress bar -->
-<div class="progress-bar-container">
-  <div class="progress-label" id="progressLabel">視聴進捗: 0 / 0</div>
-  <div class="progress-track">
-    <div class="progress-fill" id="progressFill" style="width:0%"></div>
-  </div>
-  <div class="progress-pct" id="progressPct">0%</div>
-</div>
-
-<!-- Main -->
-<main class="main">
-  <div id="loadingEl" class="loading">
-    <div class="loading-spinner"></div>
-    動画データを読み込み中...
-  </div>
-  <div id="noBanner" class="no-data-banner" style="display:none">
-    ⚠️ <strong>data.json が空です。</strong><br>
-    <code>node fetch-videos.js</code> を実行して動画データを取得してください。<br>
-    （YouTube API キーが必要です。<code>.env</code> に <code>YOUTUBE_API_KEY=xxx</code> を設定してください）
-  </div>
-  <div id="videoGrid" class="video-grid" style="display:none"></div>
-  <div id="emptyState" class="empty-state" style="display:none">
-    <div class="empty-icon">🔍</div>
-    <div class="empty-title">動画が見つかりませんでした</div>
-    <div class="empty-sub">検索条件を変えてみてください</div>
-  </div>
-</main>
-
-<!-- Note/Tag Modal -->
-<div class="modal-overlay" id="modalOverlay" style="display:none">
-  <div class="modal" id="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle"></div>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">📝 メモ</label>
-        <textarea id="noteInput" class="form-textarea" placeholder="メモを入力..."></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">🏷️ タグ（スペース区切り）</label>
-        <input type="text" id="tagInput" class="form-input" placeholder="例: 節税 投資 不動産">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
-      <button class="btn btn-primary" onclick="saveNoteAndTags()">保存</button>
-    </div>
-  </div>
-</div>
+<div class="tabs-wrap"><div class="tabs" id="tabs"></div></div>
+<div id="noBanner" style="display:none"></div>
+<div class="grid" id="grid"></div>
 
 <script>
 // ─── State ───────────────────────────────────────────────────────────────────
-let videos = [];
-let allPlaylists = [];
-let modalVideoId = null;
+const SPECIAL = ['❤️ お気に入り', '✅ 視聴済', '🔖 あとで見る'];
+const STORAGE_KEY = 'riberyu_yt_v2';
 
-const state = {
-  activeTab: 'all',
-  searchQuery: '',
-  searchMode: 'AND',
-  yearFilter: 'all',
-  sortBy: 'newest',
-  watched:    {},
-  favorites:  {},
-  watchLater: {},
-  notes:      {},
-  tags:       {}
+let VIDEOS = [];       // loaded from data.json
+let PLAYLISTS = [];    // ['すべて', ...playlist titles]
+
+const S = {
+  favs:    {},
+  checked: {},
+  later:   {},  // {id: 1|2|3}
+  memos:   {},
+  tags:    {},
+  mode:    'AND',
+  tab:     'すべて'
 };
 
-const STORAGE_KEY = 'riberyu_yt_state';
-
-function loadState() {
+// ─── LocalStorage ─────────────────────────────────────────────────────────────
+function saveLS() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    favs:    S.favs,
+    checked: S.checked,
+    later:   S.later,
+    memos:   S.memos,
+    tags:    S.tags
+  }));
+}
+function loadLS() {
   try {
-    const s = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    state.watched    = s.watched    || {};
-    state.favorites  = s.favorites  || {};
-    state.watchLater = s.watchLater || {};
-    state.notes      = s.notes      || {};
-    state.tags       = s.tags       || {};
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    S.favs    = d.favs    || {};
+    S.checked = d.checked || {};
+    S.later   = d.later   || {};
+    S.memos   = d.memos   || {};
+    S.tags    = d.tags    || {};
   } catch(e) {}
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    watched:    state.watched,
-    favorites:  state.favorites,
-    watchLater: state.watchLater,
-    notes:      state.notes,
-    tags:       state.tags
-  }));
-}
-
-// ─── Data Loading ─────────────────────────────────────────────────────────────
+// ─── Load data.json ───────────────────────────────────────────────────────────
 async function loadData() {
   try {
     const res = await fetch('data.json');
     const data = await res.json();
-    videos = data.videos || [];
-    allPlaylists = data.playlists || [];
+    VIDEOS = data.videos || [];
 
-    // If no playlists from data.json, derive from video.playlists arrays
-    if (allPlaylists.length === 0) {
-      const map = {};
-      for (const v of videos) {
-        for (const p of (v.playlists || [])) {
-          if (!map[p.id]) map[p.id] = p.title;
-        }
+    // Build playlist list
+    const seen = new Set();
+    const pls = [];
+    for (const v of VIDEOS) {
+      for (const p of (v.playlists || [])) {
+        if (!seen.has(p.id)) { seen.add(p.id); pls.push(p.title); }
       }
-      allPlaylists = Object.entries(map).map(([id, title]) => ({ id, title }));
+    }
+    // Also use top-level playlists if provided
+    if ((data.playlists || []).length > 0) {
+      PLAYLISTS = ['すべて', ...data.playlists.map(p => p.title)];
+    } else if (pls.length > 0) {
+      PLAYLISTS = ['すべて', ...pls];
+    } else {
+      PLAYLISTS = ['すべて'];
+    }
+
+    // Normalize: add .playlist (first playlist title or '') and .date
+    for (const v of VIDEOS) {
+      v.playlist = (v.playlists && v.playlists.length > 0) ? v.playlists[0].title : '';
+      v.date     = (v.publishedAt || '').slice(0, 10);
     }
   } catch(e) {
-    videos = [];
-    allPlaylists = [];
+    VIDEOS = [];
+    PLAYLISTS = ['すべて'];
   }
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function formatViews(n) {
-  if (n == null || n === 0) return '---';
-  if (n >= 100000000) return (n / 100000000).toFixed(1) + '億回';
-  if (n >= 10000)     return Math.floor(n / 10000) + '万回';
+function fmt(n) {
+  if (!n) return '---';
+  if (n >= 100000000) return (n/100000000).toFixed(1) + '億回';
+  if (n >= 10000)     return Math.floor(n/10000) + '万回';
   return n.toLocaleString() + '回';
 }
-
-function formatDate(s) {
+function fmtDate(s) {
   if (!s) return '';
   const d = new Date(s);
-  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
-
-function formatDuration(iso) {
+function fmtDuration(iso) {
   if (!iso) return '';
   const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!m) return '';
@@ -729,302 +345,280 @@ function formatDuration(iso) {
   if (h > 0) return `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   return `${min}:${String(s).padStart(2,'0')}`;
 }
-
-function esc(s) {
+function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+function escJs(s) {
+  return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+function highlight(text, kws) {
+  if (!kws.length) return escHtml(text);
+  const escaped = kws.map(k => k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  const re = new RegExp('(' + escaped.join('|') + ')', 'gi');
+  return escHtml(text).replace(re, '<mark>$1</mark>');
+}
 
-// ─── Filtering / Sorting ──────────────────────────────────────────────────────
-function getFiltered() {
-  let result = videos.filter(v => {
-    const isWatched  = !!state.watched[v.id];
-    const isFav      = !!state.favorites[v.id];
+// ─── Search mode ──────────────────────────────────────────────────────────────
+function setMode(m) {
+  S.mode = m;
+  document.getElementById('modeAND').classList.toggle('active', m==='AND');
+  document.getElementById('modeOR').classList.toggle('active',  m==='OR');
+  document.getElementById('modeHint').textContent = m==='AND'
+    ? 'すべてのキーワードを含む' : 'いずれかのキーワードを含む';
+  render();
+}
 
-    if (state.activeTab === 'watched')   return isWatched;
-    if (state.activeTab === 'favorites') return isFav;
+// ─── あとで見るポップアップ ────────────────────────────────────────────────────
+let openPopup = null;
+function toggleLaterPopup(id, el) {
+  const p = el.querySelector('.later-popup');
+  if (openPopup && openPopup !== p) openPopup.classList.remove('show');
+  p.classList.toggle('show');
+  openPopup = p.classList.contains('show') ? p : null;
+}
+function setLater(id, level) {
+  if (S.later[id] === level) delete S.later[id];
+  else S.later[id] = level;
+  if (openPopup) { openPopup.classList.remove('show'); openPopup = null; }
+  saveLS();
+  render();
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.btn-later') && openPopup) {
+    openPopup.classList.remove('show'); openPopup = null;
+  }
+});
 
-    // Main tabs: exclude watched and favorited
-    if (isWatched || isFav) return false;
+// ─── Memo / Tag ───────────────────────────────────────────────────────────────
+function saveMemo(id, val) {
+  if (val.trim()) S.memos[id] = val;
+  else delete S.memos[id];
+  saveLS();
+}
+function addTag(id) {
+  const t = prompt('タグを入力（例：超重要・復習済）');
+  if (!t || !t.trim()) return;
+  if (!S.tags[id]) S.tags[id] = [];
+  if (!S.tags[id].includes(t.trim())) S.tags[id].push(t.trim());
+  saveLS();
+  render();
+}
+function removeTag(id, t) {
+  S.tags[id] = (S.tags[id] || []).filter(x => x !== t);
+  saveLS();
+  render();
+}
 
-    // Playlist tab
-    if (state.activeTab !== 'all') {
-      const hasPlaylist = (v.playlists||[]).some(p => p.id === state.activeTab);
-      if (!hasPlaylist) return false;
+// ─── Filter / Sort ────────────────────────────────────────────────────────────
+function getItems() {
+  const kw  = document.getElementById('searchInput').value.trim();
+  const kws = kw ? kw.split(/\s+/).filter(Boolean) : [];
+  const year = document.getElementById('yearSelect').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let items = VIDEOS.filter(v => {
+    if (S.tab === '❤️ お気に入り') return !!S.favs[v.id];
+    if (S.tab === '✅ 視聴済')     return !!S.checked[v.id];
+    if (S.tab === '🔖 あとで見る') return !!S.later[v.id];
+
+    // 通常タブ：視聴済・お気に入りは除外（あとで見るは残す）
+    if (S.checked[v.id] || S.favs[v.id]) return false;
+
+    const matchPL = S.tab === 'すべて' || v.playlist === S.tab;
+    if (!matchPL) return false;
+    if (year && !v.date.startsWith(year)) return false;
+    if (kws.length) {
+      const text = v.title + ' ' + v.playlist + ' ' + (S.tags[v.id]||[]).join(' ');
+      return S.mode === 'AND'
+        ? kws.every(k => text.includes(k))
+        : kws.some(k  => text.includes(k));
     }
-
-    // Year
-    if (state.yearFilter !== 'all') {
-      if (new Date(v.publishedAt).getFullYear().toString() !== state.yearFilter) return false;
-    }
-
-    // Search
-    if (state.searchQuery.trim()) {
-      const kws = state.searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      const corpus = [v.title, v.description||'', ...(state.tags[v.id]||[])].join(' ').toLowerCase();
-      if (state.searchMode === 'AND') {
-        if (!kws.every(k => corpus.includes(k))) return false;
-      } else {
-        if (!kws.some(k => corpus.includes(k))) return false;
-      }
-    }
-
     return true;
   });
 
-  result.sort((a, b) => {
-    switch (state.sortBy) {
-      case 'newest': return new Date(b.publishedAt) - new Date(a.publishedAt);
-      case 'oldest': return new Date(a.publishedAt) - new Date(b.publishedAt);
-      case 'views':  return (b.viewCount||0) - (a.viewCount||0);
-      case 'title':  return (a.title||'').localeCompare(b.title||'', 'ja');
-    }
-    return 0;
-  });
+  // 専用タブでもキーワード・年フィルタ適用
+  if (SPECIAL.includes(S.tab)) {
+    if (kws.length) items = items.filter(v => {
+      const text = v.title + ' ' + v.playlist + ' ' + (S.tags[v.id]||[]).join(' ');
+      return S.mode === 'AND' ? kws.every(k => text.includes(k)) : kws.some(k => text.includes(k));
+    });
+    if (year) items = items.filter(v => v.date.startsWith(year));
+  }
 
-  return result;
+  if (sort === 'views') items.sort((a,b) => (b.viewCount||0)-(a.viewCount||0));
+  else if (sort === 'date') items.sort((a,b) => new Date(b.date)-new Date(a.date));
+  else items.sort((a,b) => (a.title||'').localeCompare(b.title||'','ja'));
+
+  return { items, kws };
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────────────
+function makeCard(v, i, kws) {
+  const isF     = !!S.favs[v.id];
+  const isC     = !!S.checked[v.id];
+  const laterLv = S.later[v.id] || 0;
+  const memo    = S.memos[v.id] || '';
+  const tags    = S.tags[v.id]  || [];
+  const dur     = fmtDuration(v.duration);
+  const thumb   = v.thumbnail || `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`;
+
+  let cardExtra = '';
+  if (S.tab === '❤️ お気に入り') cardExtra = 'in-fav';
+  else if (S.tab === '✅ 視聴済') cardExtra = 'in-check';
+  else if (S.tab === '🔖 あとで見る') cardExtra = `in-later${laterLv}`;
+
+  const laterBtnCls  = laterLv ? `btn-later on${laterLv}` : 'btn-later';
+  const laterLabel   = ['','🔖 低優先','🔖 中優先','🔖 高優先'][laterLv] || '🔖 あとで見る';
+  const laterBadgeL  = ['','低優先','中優先','高優先'][laterLv] || '';
+
+  const vid = escJs(v.id);
+
+  return `
+<div class="card ${cardExtra}" style="animation-delay:${i*25}ms">
+  <div class="badge-row">
+    ${isF ? '<span class="badge badge-fav">❤️ お気に入り</span>' : ''}
+    ${isC ? '<span class="badge badge-check">✅ 視聴済</span>' : ''}
+    ${laterLv ? `<span class="badge badge-later l${laterLv}">${laterBadgeL}</span>` : ''}
+  </div>
+  <div class="thumb-wrap" onclick="window.open('https://www.youtube.com/watch?v=${vid}','_blank')">
+    <img src="${escHtml(thumb)}" alt="" loading="lazy"
+      onerror="this.src='https://i.ytimg.com/vi/${vid}/mqdefault.jpg'">
+    <div class="play-overlay"><div class="play-btn">▶</div></div>
+    ${dur ? `<div class="duration">${escHtml(dur)}</div>` : ''}
+  </div>
+  <div class="card-body">
+    ${v.playlist ? `<div class="playlist-tag">${escHtml(v.playlist)}</div>` : ''}
+    <div class="card-title" onclick="window.open('https://www.youtube.com/watch?v=${vid}','_blank')">${highlight(v.title, kws)}</div>
+    <div class="card-meta">
+      <span class="views">${fmt(v.viewCount)}</span>
+      <span>${fmtDate(v.date)}</span>
+    </div>
+  </div>
+  <div class="memo-area">
+    <textarea class="memo-input" rows="2" placeholder="メモを残す…"
+      onchange="saveMemo('${vid}',this.value)">${escHtml(memo)}</textarea>
+    <div class="tags-row">
+      ${tags.map(t=>`<span class="tag" onclick="removeTag('${vid}','${escJs(t)}')">🏷 ${escHtml(t)} ✕</span>`).join('')}
+      <button class="tag-add" onclick="addTag('${vid}')">＋ タグ追加</button>
+    </div>
+  </div>
+  <div class="card-actions">
+    <button class="action-btn btn-check ${isC?'on':''}" onclick="toggle('check','${vid}')">
+      ${isC ? '✅ 視聴済に戻す' : '☐ 視聴済にする'}
+    </button>
+    <button class="action-btn btn-fav ${isF?'on':''}" onclick="toggle('fav','${vid}')">
+      ${isF ? '❤️ 戻す' : '🤍 お気に入り'}
+    </button>
+    <button class="action-btn ${laterBtnCls}" onclick="toggleLaterPopup('${vid}',this)">
+      ${laterLabel}
+      <div class="later-popup" onclick="event.stopPropagation()">
+        <div class="later-opt ${laterLv===1?'active-opt':''}" onclick="setLater('${vid}',1)">🔖 低優先（いつか）</div>
+        <div class="later-opt ${laterLv===2?'active-opt':''}" onclick="setLater('${vid}',2)">🔖 中優先（今週）</div>
+        <div class="later-opt ${laterLv===3?'active-opt':''}" onclick="setLater('${vid}',3)">🔖 高優先（今日）</div>
+        ${laterLv ? `<div class="later-opt" onclick="setLater('${vid}',${laterLv})">✕ 解除</div>` : ''}
+      </div>
+    </button>
+  </div>
+</div>`;
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function renderTabs() {
+  const favCnt   = Object.keys(S.favs).length;
+  const checkCnt = Object.keys(S.checked).length;
+  const laterCnt = Object.keys(S.later).length;
+  const all = [...PLAYLISTS, ...SPECIAL];
+
+  document.getElementById('tabs').innerHTML = all.map(p => {
+    let badge = '';
+    if (p === '❤️ お気に入り' && favCnt)   badge = `<span class="tab-badge">${favCnt}</span>`;
+    if (p === '✅ 視聴済'     && checkCnt) badge = `<span class="tab-badge">${checkCnt}</span>`;
+    if (p === '🔖 あとで見る' && laterCnt) badge = `<span class="tab-badge">${laterCnt}</span>`;
+    const cls = ['tab',
+      p === '❤️ お気に入り' ? 't-fav'   : '',
+      p === '✅ 視聴済'     ? 't-check' : '',
+      p === '🔖 あとで見る' ? 't-later' : '',
+      p === S.tab           ? 'active'  : ''
+    ].filter(Boolean).join(' ');
+    return `<div class="${cls}" onclick="setTab('${escJs(p)}')">${escHtml(p)}${badge}</div>`;
+  }).join('');
 }
 
 // ─── Render ───────────────────────────────────────────────────────────────────
 function render() {
+  const { items, kws } = getItems();
+  const total    = VIDEOS.length;
+  const checkCnt = Object.keys(S.checked).length;
+  const pct      = total > 0 ? Math.round(checkCnt / total * 100) : 0;
+
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('pctLabel').textContent     = pct + '%';
+  document.getElementById('cntCheck').textContent     = checkCnt;
+  document.getElementById('cntFav').textContent       = Object.keys(S.favs).length;
+  document.getElementById('cntLater').textContent     = Object.keys(S.later).length;
+  document.getElementById('cntTotal').textContent     = total;
+
   renderTabs();
-  renderProgress();
-  const filtered = getFiltered();
-  renderGrid(filtered);
-  document.getElementById('resultCount').textContent = `${filtered.length.toLocaleString()}件`;
-}
 
-function renderTabs() {
-  const row = document.getElementById('tabsRow');
-  const tabs = [
-    { id: 'all', label: 'すべて' },
-    ...allPlaylists.map(p => ({ id: p.id, label: p.title })),
-    { id: 'watched',   label: `✅ 視聴済 (${Object.keys(state.watched).length})` },
-    { id: 'favorites', label: `❤️ お気に入り (${Object.keys(state.favorites).length})` }
-  ];
-  row.innerHTML = tabs.map(t =>
-    `<button class="tab${state.activeTab===t.id?' active':''}" onclick="setTab('${t.id}')">${esc(t.label)}</button>`
-  ).join('');
-}
-
-function renderProgress() {
-  const total   = videos.length;
-  const watched = Object.keys(state.watched).length;
-  const pct     = total > 0 ? Math.round(watched / total * 100) : 0;
-  document.getElementById('progressLabel').textContent = `視聴進捗: ${watched.toLocaleString()} / ${total.toLocaleString()}`;
-  document.getElementById('progressFill').style.width  = pct + '%';
-  document.getElementById('progressPct').textContent   = pct + '%';
-}
-
-function renderGrid(filtered) {
-  const grid    = document.getElementById('videoGrid');
-  const empty   = document.getElementById('emptyState');
-  const loading = document.getElementById('loadingEl');
-  loading.style.display = 'none';
-
-  if (filtered.length === 0) {
-    grid.style.display  = 'none';
-    empty.style.display = 'block';
+  if (!items.length) {
+    const isNormal = !SPECIAL.includes(S.tab);
+    const msg = S.tab === '❤️ お気に入り' ? 'お気に入りはまだありません' :
+                S.tab === '✅ 視聴済'     ? '視聴済の動画がありません' :
+                S.tab === '🔖 あとで見る' ? 'あとで見るリストが空です' :
+                isNormal ? 'すべて視聴済 or お気に入り済かも👏' : '該当動画なし';
+    const em = S.tab === '❤️ お気に入り' ? '❤️' :
+               S.tab === '✅ 視聴済'     ? '✅' :
+               S.tab === '🔖 あとで見る' ? '🔖' : '🎉';
+    document.getElementById('grid').innerHTML =
+      `<div class="empty"><div class="em">${em}</div><div>${msg}</div></div>`;
     return;
   }
-  empty.style.display = 'none';
-  grid.style.display  = 'grid';
-  grid.innerHTML = filtered.map(v => renderCard(v)).join('');
+  document.getElementById('grid').innerHTML = items.map((v, i) => makeCard(v, i, kws)).join('');
 }
 
-function renderCard(v) {
-  const wl       = state.watchLater[v.id] || '';
-  const isWatched = !!state.watched[v.id];
-  const isFav     = !!state.favorites[v.id];
-  const userTags  = state.tags[v.id] || [];
-  const note      = state.notes[v.id] || '';
-  const dur       = formatDuration(v.duration);
-  const thumb     = v.thumbnail || `https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`;
-  const ytUrl     = `https://www.youtube.com/watch?v=${v.id}`;
-
-  const plTag = (v.playlists||[]).length > 0
-    ? `<div class="playlist-chip">${esc(v.playlists[0].title)}</div>` : '';
-
-  const tagRow = userTags.length > 0
-    ? `<div class="tag-row">${userTags.map(t=>`<span class="tag-chip">${esc(t)}</span>`).join('')}</div>` : '';
-
-  const noteEl = note
-    ? `<div class="note-preview">📝 ${esc(note)}</div>` : '';
-
-  const wlBadge = wl
-    ? `<div class="watch-later-badge ${wl}">${wl==='low'?'低優先度':wl==='medium'?'中優先度':'高優先度'}</div>` : '';
-
-  const wlLabel = {low:'低優先度',medium:'中優先度',high:'高優先度'};
-
-  return `
-    <div class="video-card" id="card-${esc(v.id)}">
-      <div class="thumb-wrap" onclick="openYT('${esc(v.id)}')">
-        <img class="thumb-img" src="${esc(thumb)}" alt="${esc(v.title)}" loading="lazy"
-          onerror="this.src='https://i.ytimg.com/vi/${esc(v.id)}/mqdefault.jpg'">
-        <div class="thumb-overlay"><div class="play-icon">▶</div></div>
-        ${dur ? `<div class="duration-badge">${esc(dur)}</div>` : ''}
-        ${wlBadge}
-      </div>
-      <div class="card-body">
-        <div class="video-title">${esc(v.title)}</div>
-        <div class="video-meta">
-          <span><span class="meta-icon">👁</span>${formatViews(v.viewCount)}</span>
-          <span><span class="meta-icon">📅</span>${formatDate(v.publishedAt)}</span>
-        </div>
-        ${plTag}
-        ${tagRow}
-        ${noteEl}
-        <div class="card-actions">
-          <button class="action-btn ${isFav?'fav-on':''}" onclick="toggleFav('${esc(v.id)}')"
-            title="${isFav?'お気に入り解除':'お気に入りに追加'}">
-            ${isFav?'❤️':'🤍'} お気に入り
-          </button>
-          <button class="action-btn ${isWatched?'watch-on':''}" onclick="toggleWatched('${esc(v.id)}')"
-            title="${isWatched?'視聴済を解除':'視聴済にする'}">
-            ${isWatched?'✅':'☐'} 視聴済
-          </button>
-        </div>
-        <div class="card-actions">
-          <select class="wl-select ${wl?'wl-set':''}" onchange="setWatchLater('${esc(v.id)}',this.value)"
-            title="あとで見る優先度">
-            <option value=""     ${!wl?'selected':''}>⏱ あとで見る</option>
-            <option value="low"    ${wl==='low'?'selected':''}>低優先度</option>
-            <option value="medium" ${wl==='medium'?'selected':''}>中優先度</option>
-            <option value="high"   ${wl==='high'?'selected':''}>高優先度</option>
-          </select>
-          <button class="action-btn ${note||userTags.length?'watch-on':''}"
-            onclick="openModal('${esc(v.id)}')" title="メモ・タグを編集">
-            📝 メモ
-          </button>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ─── Actions ──────────────────────────────────────────────────────────────────
-function setTab(id) {
-  state.activeTab = id;
+// ─── Toggle ───────────────────────────────────────────────────────────────────
+function toggle(type, id) {
+  if (type === 'fav')   { if (S.favs[id])    delete S.favs[id];    else S.favs[id]    = true; }
+  if (type === 'check') { if (S.checked[id]) delete S.checked[id]; else S.checked[id] = true; }
+  saveLS();
   render();
 }
 
-function setMode(mode) {
-  state.searchMode = mode;
-  document.getElementById('andBtn').classList.toggle('active', mode==='AND');
-  document.getElementById('orBtn').classList.toggle('active',  mode==='OR');
-  render();
-}
-
-function openYT(id) {
-  window.open(`https://www.youtube.com/watch?v=${id}`, '_blank');
-}
-
-function toggleWatched(id) {
-  if (state.watched[id]) delete state.watched[id];
-  else state.watched[id] = true;
-  saveState();
-  render();
-}
-
-function toggleFav(id) {
-  if (state.favorites[id]) delete state.favorites[id];
-  else state.favorites[id] = true;
-  saveState();
-  render();
-}
-
-function setWatchLater(id, val) {
-  if (val) state.watchLater[id] = val;
-  else     delete state.watchLater[id];
-  saveState();
-  // Re-render just this card's badge
-  const card = document.getElementById('card-' + id);
-  if (card) {
-    const v = videos.find(v => v.id === id);
-    if (v) card.outerHTML = renderCard(v);
-  }
-}
-
-// ─── Modal ────────────────────────────────────────────────────────────────────
-function openModal(id) {
-  const v = videos.find(v => v.id === id);
-  if (!v) return;
-  modalVideoId = id;
-  document.getElementById('modalTitle').textContent = v.title;
-  document.getElementById('noteInput').value  = state.notes[id] || '';
-  document.getElementById('tagInput').value   = (state.tags[id] || []).join(' ');
-  document.getElementById('modalOverlay').style.display = 'flex';
-}
-
-function closeModal(e) {
-  if (e && e.target !== document.getElementById('modalOverlay')) return;
-  document.getElementById('modalOverlay').style.display = 'none';
-  modalVideoId = null;
-}
-
-function saveNoteAndTags() {
-  if (!modalVideoId) return;
-  const note = document.getElementById('noteInput').value.trim();
-  const tags = document.getElementById('tagInput').value.trim().split(/\s+/).filter(Boolean);
-
-  if (note)          state.notes[modalVideoId] = note;
-  else               delete state.notes[modalVideoId];
-
-  if (tags.length)   state.tags[modalVideoId]  = tags;
-  else               delete state.tags[modalVideoId];
-
-  saveState();
-  document.getElementById('modalOverlay').style.display = 'none';
-  modalVideoId = null;
-  render();
-}
-
-// ─── Year filter population ───────────────────────────────────────────────────
-function populateYearFilter() {
-  const years = [...new Set(videos.map(v => new Date(v.publishedAt).getFullYear()))]
-    .filter(Boolean).sort((a,b) => b - a);
-  const sel = document.getElementById('yearFilter');
-  years.forEach(y => {
-    const o = document.createElement('option');
-    o.value = y;
-    o.textContent = y + '年';
-    sel.appendChild(o);
-  });
-}
-
-// ─── Search ───────────────────────────────────────────────────────────────────
-let searchTimer;
-document.getElementById('searchInput').addEventListener('input', e => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    state.searchQuery = e.target.value;
-    render();
-  }, 200);
-});
-
-// Close modal on overlay click
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-});
-
-// Close modal on Escape
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.getElementById('modalOverlay').style.display = 'none';
-});
+function setTab(p) { S.tab = p; render(); }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 (async () => {
-  loadState();
+  loadLS();
+
+  // Loading state
+  document.getElementById('grid').innerHTML = `<div class="loading"><div class="spinner"></div>動画データを読み込み中...</div>`;
+
   await loadData();
 
-  const noBanner = document.getElementById('noBanner');
-  if (videos.length === 0) {
-    document.getElementById('loadingEl').style.display = 'none';
-    noBanner.style.display = 'block';
+  if (VIDEOS.length === 0) {
+    document.getElementById('grid').innerHTML = '';
+    document.getElementById('noBanner').style.display = 'block';
+    document.getElementById('noBanner').innerHTML = `
+      <div class="no-data">
+        ⚠️ <strong>data.json に動画データがありません。</strong><br>
+        以下の手順で動画データを取得してください：<br>
+        1. <code>cp .env.example .env</code> して API キーを設定<br>
+        2. <code>npm install</code><br>
+        3. <code>node fetch-videos.js</code> を実行 → data.json が生成される<br>
+        4. data.json をコミット &amp; プッシュ → GitHub Pages に反映
+      </div>`;
     renderTabs();
-    renderProgress();
     return;
   }
 
-  populateYearFilter();
+  // Populate year filter
+  const years = [...new Set(VIDEOS.map(v => v.date.slice(0,4)).filter(Boolean))].sort((a,b)=>b-a);
+  const sel = document.getElementById('yearSelect');
+  years.forEach(y => {
+    const o = document.createElement('option'); o.value = y; o.textContent = y + '年';
+    sel.appendChild(o);
+  });
+
   render();
 })();
 </script>
