@@ -1,0 +1,12 @@
+{
+  "name": "riberyu-search",
+  "version": "1.0.0",
+  "description": "リベ大 YouTube 検索アプリ",
+  "scripts": {
+    "fetch": "node fetch-videos.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "googleapis": "^140.0.0"
+  }
+}
