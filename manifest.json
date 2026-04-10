@@ -1,0 +1,26 @@
+{
+  "name": "両学長 リベ大 Search",
+  "short_name": "リベ大Search",
+  "description": "リベ大YouTube動画を検索・管理するアプリ",
+  "start_url": "/riberyu-search/",
+  "scope": "/riberyu-search/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#f0b429",
+  "orientation": "portrait-primary",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
