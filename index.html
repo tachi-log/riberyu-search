@@ -201,6 +201,21 @@ mark{background:rgba(240,180,41,.25);color:var(--gold);border-radius:2px;padding
 }
 @keyframes spin{to{transform:rotate(360deg);}}
 
+/* PLAY-ALL BAR */
+.playall-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 20px;background:#0a0a0a;border-bottom:1px solid var(--border);
+}
+.playall-btn{
+  display:flex;align-items:center;gap:7px;
+  background:var(--gold);color:#000;border:none;border-radius:20px;
+  padding:6px 16px;font-size:12px;font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;cursor:pointer;transition:background .15s;
+  white-space:nowrap;
+}
+.playall-btn:hover{background:#d4a020;}
+.playall-count{font-size:11px;color:var(--muted);}
+
 /* RESPONSIVE */
 @media(max-width:600px){
   header{padding:10px 14px;}
@@ -255,6 +270,10 @@ mark{background:rgba(240,180,41,.25);color:var(--gold);border-radius:2px;padding
 </div>
 
 <div class="tabs-wrap"><div class="tabs" id="tabs"></div></div>
+<div class="playall-bar" id="playallBar" style="display:none">
+  <button class="playall-btn" onclick="playAll()">▶ 連続再生</button>
+  <span class="playall-count" id="playallCount"></span>
+</div>
 <div id="noBanner" style="display:none"></div>
 <div class="grid" id="grid"></div>
 
@@ -263,8 +282,9 @@ mark{background:rgba(240,180,41,.25);color:var(--gold);border-radius:2px;padding
 const SPECIAL = ['❤️ お気に入り', '✅ 視聴済', '🔖 あとで見る'];
 const STORAGE_KEY = 'riberyu_yt_v2';
 
-let VIDEOS = [];       // loaded from data.json
-let PLAYLISTS = [];    // ['すべて', ...playlist titles]
+let VIDEOS = [];         // loaded from data.json
+let PLAYLISTS = [];      // ['すべて', ...playlist titles]
+let PLAYLISTS_META = []; // [{id, title}, ...]
 
 const S = {
   favs:    {},
@@ -314,6 +334,7 @@ async function loadData() {
     }
     // Also use top-level playlists if provided
     if ((data.playlists || []).length > 0) {
+      PLAYLISTS_META = data.playlists;
       PLAYLISTS = ['すべて', ...data.playlists.map(p => p.title)];
     } else if (pls.length > 0) {
       PLAYLISTS = ['すべて', ...pls];
@@ -566,6 +587,7 @@ function render() {
   document.getElementById('cntTotal').textContent     = total;
 
   renderTabs();
+  renderPlayAllBar(items);
 
   if (!items.length) {
     const isNormal = !SPECIAL.includes(S.tab);
@@ -592,6 +614,37 @@ function toggle(type, id) {
 }
 
 function setTab(p) { S.tab = p; render(); }
+
+// ─── 連続再生 ─────────────────────────────────────────────────────────────────
+function playAll() {
+  const { items } = getItems();
+  if (!items.length) return;
+
+  // プレイリストタブ → YouTube プレイリストをそのまま開く
+  if (!SPECIAL.includes(S.tab) && S.tab !== 'すべて') {
+    const pl = PLAYLISTS_META.find(p => p.title === S.tab);
+    if (pl) {
+      window.open(`https://www.youtube.com/playlist?list=${pl.id}`, '_blank');
+      return;
+    }
+  }
+
+  // それ以外（検索結果・すべて・専用タブ）→ watch_videos URL（最大50件）
+  const ids = items.slice(0, 50).map(v => v.id).join(',');
+  window.open(`https://www.youtube.com/watch_videos?video_ids=${ids}`, '_blank');
+}
+
+function renderPlayAllBar(items) {
+  const bar = document.getElementById('playallBar');
+  if (!items.length || SPECIAL.includes(S.tab)) {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  const isPlaylist = !SPECIAL.includes(S.tab) && S.tab !== 'すべて';
+  const count = isPlaylist ? `全${items.length}本` : `表示中 ${Math.min(items.length, 50)}本${items.length > 50 ? `（先頭50本）` : ''}`;
+  document.getElementById('playallCount').textContent = count;
+}
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 (async () => {
