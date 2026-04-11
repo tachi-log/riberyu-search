@@ -620,8 +620,12 @@ function playAll() {
   const { items } = getItems();
   if (!items.length) return;
 
-  // プレイリストタブ → YouTube プレイリストをそのまま開く
-  if (!SPECIAL.includes(S.tab) && S.tab !== 'すべて') {
+  const year    = document.getElementById('yearSelect').value;
+  const keyword = document.getElementById('searchInput').value.trim();
+  const filtered = year || keyword; // 絞り込みが入っているか
+
+  // プレイリストタブ かつ 絞り込みなし → YouTube 公式プレイリストをそのまま開く
+  if (!SPECIAL.includes(S.tab) && S.tab !== 'すべて' && !filtered) {
     const pl = PLAYLISTS_META.find(p => p.title === S.tab);
     if (pl) {
       window.open(`https://www.youtube.com/playlist?list=${pl.id}`, '_blank');
@@ -629,7 +633,7 @@ function playAll() {
     }
   }
 
-  // それ以外（検索結果・すべて・専用タブ）→ watch_videos URL（最大50件）
+  // 年・キーワード絞り込みあり or すべてタブ → 表示中の動画を連続再生（最大50本）
   const ids = items.slice(0, 50).map(v => v.id).join(',');
   window.open(`https://www.youtube.com/watch_videos?video_ids=${ids}`, '_blank');
 }
@@ -641,8 +645,17 @@ function renderPlayAllBar(items) {
     return;
   }
   bar.style.display = 'flex';
-  const isPlaylist = !SPECIAL.includes(S.tab) && S.tab !== 'すべて';
-  const count = isPlaylist ? `全${items.length}本` : `表示中 ${Math.min(items.length, 50)}本${items.length > 50 ? `（先頭50本）` : ''}`;
+
+  const year     = document.getElementById('yearSelect').value;
+  const keyword  = document.getElementById('searchInput').value.trim();
+  const filtered = year || keyword;
+  const isFullPlaylist = !SPECIAL.includes(S.tab) && S.tab !== 'すべて' && !filtered;
+
+  const shown = Math.min(items.length, 50);
+  const over  = items.length > 50 ? `（先頭50本）` : '';
+  const count = isFullPlaylist
+    ? `全${items.length}本`
+    : `${year ? year + '年 ' : ''}${shown}本${over}`;
   document.getElementById('playallCount').textContent = count;
 }
 
