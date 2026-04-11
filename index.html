@@ -57,6 +57,7 @@ header{
 .progress-section{
   background:#0a0a0a;border-bottom:1px solid var(--border);
   padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  position:sticky;z-index:150;
 }
 .progress-bar-wrap{flex:1;min-width:160px;}
 .progress-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;justify-content:space-between;}
@@ -71,7 +72,7 @@ header{
 .pstat.p strong{color:var(--purple);}
 
 /* TABS */
-.tabs-wrap{padding:12px 20px 0;overflow-x:auto;scrollbar-width:none;}
+.tabs-wrap{padding:12px 20px 0;overflow-x:auto;scrollbar-width:none;position:sticky;z-index:140;background:var(--bg);}
 .tabs-wrap::-webkit-scrollbar{display:none;}
 .tabs{display:flex;gap:7px;min-width:max-content;}
 .tab{
@@ -205,6 +206,7 @@ mark{background:rgba(240,180,41,.25);color:var(--gold);border-radius:2px;padding
 .playall-bar{
   display:flex;align-items:center;gap:10px;
   padding:8px 20px;background:#0a0a0a;border-bottom:1px solid var(--border);
+  position:sticky;z-index:130;
 }
 .playall-btn{
   display:flex;align-items:center;gap:7px;
@@ -693,7 +695,26 @@ function renderPlayAllBar(items) {
   });
 
   render();
+  updateStickyTops();
 })();
+
+// ─── Sticky offset 計算（ヘッダー高さに合わせてずれなく固定） ─────────────────
+function updateStickyTops() {
+  const headerH   = document.querySelector('header').offsetHeight;
+  const progressEl = document.querySelector('.progress-section');
+  const tabsEl     = document.querySelector('.tabs-wrap');
+  const playallEl  = document.querySelector('.playall-bar');
+
+  progressEl.style.top = headerH + 'px';
+  const progressH = progressEl.offsetHeight;
+
+  tabsEl.style.top = (headerH + progressH) + 'px';
+  const tabsH = tabsEl.offsetHeight;
+
+  playallEl.style.top = (headerH + progressH + tabsH) + 'px';
+}
+
+window.addEventListener('resize', updateStickyTops);
 
 // Service Worker 登録（PWA対応）
 if ('serviceWorker' in navigator) {
