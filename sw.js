@@ -1,5 +1,5 @@
 // Service Worker — オフライン対応 & 高速起動
-const CACHE = 'riberyu-v1';
+const CACHE = 'riberyu-v2';
 const STATIC = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 
 // インストール: 静的ファイルをキャッシュ
