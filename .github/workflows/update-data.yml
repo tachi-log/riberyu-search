@@ -2,8 +2,11 @@ name: 動画データ毎日自動更新
 
 on:
   schedule:
-    - cron: '0 21 * * *'  # 毎日 朝6時（JST）= UTC 21:00
+    - cron: '0 3 * * *'   # 毎日 正午12時（JST）= UTC 03:00
   workflow_dispatch:       # 手動実行も可能
+
+permissions:
+  contents: write
 
 jobs:
   update:
