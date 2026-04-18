@@ -244,7 +244,8 @@ mark{background:rgba(240,180,41,.25);color:var(--gold);border-radius:2px;padding
         <option value="">すべての年</option>
       </select>
       <select class="sort-select" id="sortSelect" onchange="render()">
-        <option value="date">新しい順</option>
+        <option value="date_desc">新しい順</option>
+        <option value="date_asc">古い順</option>
         <option value="views">再生数順</option>
         <option value="title">タイトル順</option>
       </select>
@@ -476,7 +477,8 @@ function getItems() {
   }
 
   if (sort === 'views') items.sort((a,b) => (b.viewCount||0)-(a.viewCount||0));
-  else if (sort === 'date') items.sort((a,b) => new Date(b.date)-new Date(a.date));
+  else if (sort === 'date_desc' || sort === 'date') items.sort((a,b) => new Date(b.date)-new Date(a.date));
+  else if (sort === 'date_asc') items.sort((a,b) => new Date(a.date)-new Date(b.date));
   else items.sort((a,b) => (a.title||'').localeCompare(b.title||'','ja'));
 
   return { items, kws };
